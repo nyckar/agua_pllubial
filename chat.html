@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaBot - Asistente sobre el Agua</title>
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --secondary-color: #4fc3f7;
+            --accent-color: #00bcd4;
+            --light-color: #e1f5fe;
+            --dark-color: #01579b;
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --card-bg: white;
+            --input-bg: white;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-color: #e0e0e0;
+        }
+
+        .dark-mode {
+            --primary-color: #0d47a1;
+            --secondary-color: #0277bd;
+            --accent-color: #00838f;
+            --light-color: #263238;
+            --dark-color: #002171;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --border-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Fondo animado */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #1e88e5 0%, #4fc3f7 50%, #00bcd4 100%);
+            opacity: 0.1;
+            animation: gradientShift 15s ease infinite;
+            background-size: 400% 400%;
+        }
+
+        .dark-mode .background-animation {
+            background: linear-gradient(135deg, #0d47a1 0%, #0277bd 50%, #00838f 100%);
+            opacity: 0.15;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .water-bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: bubble-rise linear infinite;
+        }
+
+        @keyframes bubble-rise {
+            0% {
+                transform: translateY(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            animation: containerAppear 0.5s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes containerAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .chat-header {
+            background: linear-gradient(to right, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            animation: headerSlide 0.5s ease;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+            animation: wave 10s linear infinite;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-20px); }
+        }
+
+        @keyframes headerSlide {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .water-drop {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 10px;
+            right: 20px;
+            animation: drip 3s infinite;
+            z-index: 1;
+        }
+
+        @keyframes drip {
+            0% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(10px); opacity: 0.7; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            z-index: 1;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--card-bg);
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            animation: messageAppear 0.3s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .bot-message {
+            background-color: var(--light-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            color: var(--text-color);
+        }
+
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            animation: userMessageAppear 0.3s ease;
+        }
+
+        @keyframes userMessageAppear {
+            from {
+                opacity: 0;
+                transform: translateX(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .input-container {
+            display: flex;
+            padding: 15px;
+            background-color: var(--input-bg);
+            border-top: 1px solid var(--border-color);
+            animation: inputSlide 0.5s ease;
+        }
+
+        @keyframes inputSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s;
+        }
+
+        .input-container input:focus {
+            box-shadow: 0 2px 10px var(--primary-color);
+            transform: scale(1.02);
+        }
+
+        .input-container button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .input-container button:hover {
+            background-color: var(--dark-color);
+            transform: scale(1.05);
+        }
+
+        .input-container button:active {
+            transform: scale(0.95);
+        }
+
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 15px;
+            background-color: var(--input-bg);
+            border-top: 1px solid var(--border-color);
+            animation: quickQuestionsSlide 0.5s ease;
+        }
+
+        @keyframes quickQuestionsSlide {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .quick-question {
+            background-color: var(--card-bg);
+            border: 1px solid var(--secondary-color);
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-color);
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .quick-question:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quick-question:active {
+            transform: translateY(0);
+        }
+
+        .animation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            height: 150px;
+            animation: animationAppear 0.5s ease;
+        }
+
+        @keyframes animationAppear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .water-tank {
+            position: relative;
+            width: 120px;
+            height: 150px;
+            background-color: var(--light-color);
+            border: 2px solid var(--dark-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .water-level {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--accent-color);
+            transition: height 2s ease;
+            animation: waterRise 2s ease;
+        }
+
+        @keyframes waterRise {
+            from { height: 0%; }
+            to { height: 70%; }
+        }
+
+        .roof {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            background-color: #bdbdbd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .raindrop {
+            position: absolute;
+            width: 3px;
+            height: 10px;
+            background-color: var(--accent-color);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: fall 1.5s linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10px); opacity: 1; }
+            100% { transform: translateY(100px); opacity: 0; }
+        }
+
+        .tip-container {
+            background-color: var(--light-color);
+            border-left: 4px solid var(--accent-color);
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            animation: slideIn 0.5s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .calculation {
+            background-color: var(--light-color);
+            border-left: 4px solid var(--secondary-color);
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            font-family: monospace;
+            animation: slideIn 0.5s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: var(--light-color);
+            border-radius: 18px;
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-color);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 95vh;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .quick-questions {
+                justify-content: center;
+            }
+
+            .back-link {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="water-bubbles" id="waterBubbles"></div>
+
+    <a href="index.html" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Regresar a la página principal
+    </a>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <button class="theme-toggle" id="themeToggle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <h1>AquaBot</h1>
+            <p>Tu asistente sobre el uso y conservación del agua</p>
+            <div class="water-drop"></div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                ¡Hola! Soy AquaBot, tu asistente sobre el uso y conservación del agua. ¿En qué puedo ayudarte hoy?
+            </div>
+            <div class="message bot-message">
+                Puedes preguntarme sobre:
+                <ul>
+                    <li>Capacidad de almacenamiento de agua</li>
+                    <li>Captación de agua de lluvia</li>
+                    <li>Consejos para ahorrar agua</li>
+                    <li>Cálculos relacionados con el agua</li>
+                </ul>
+                O selecciona una pregunta rápida abajo ↓
+            </div>
+        </div>
+
+        <div class="quick-questions">
+            <div class="quick-question" onclick="askQuickQuestion(0)">Capacidad de una tina</div>
+            <div class="quick-question" onclick="askQuickQuestion(1)">Agua en lavadora</div>
+            <div class="quick-question" onclick="askQuickQuestion(2)">Captación en techo</div>
+            <div class="quick-question" onclick="askQuickQuestion(3)">Consejos para ahorrar</div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Escribe tu pregunta aquí..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const themeToggle = document.getElementById('themeToggle');
+        const waterBubbles = document.getElementById('waterBubbles');
+
+        // Crear burbujas animadas
+        function createBubbles() {
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+
+                const size = Math.random() * 30 + 10;
+                const left = Math.random() * 100;
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 10;
+
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${left}%`;
+                bubble.style.animationDuration = `${duration}s`;
+                bubble.style.animationDelay = `${delay}s`;
+
+                waterBubbles.appendChild(bubble);
+            }
+        }
+
+        // Preguntas rápidas predefinidas
+        const quickQuestions = [
+            "¿Cuánta agua cabe en una tina promedio?",
+            "¿Cuánta agua usa una lavadora?",
+            "¿Cuánta agua de lluvia se puede captar en un techo?",
+            "¿Cómo puedo ahorrar agua en casa?"
+        ];
+
+        // Respuestas del bot
+        const botResponses = {
+            "tina": {
+                text: "Una tina promedio tiene una capacidad de entre 150 y 200 litros de agua. Sin embargo, esto puede variar según el tamaño y diseño de la tina.",
+                animation: "waterTank",
+                calculation: "Cálculo: Tina estándar (1.7m x 0.7m x 0.4m) = 476 litros, pero normalmente se llena hasta 1/3, es decir, unos 160 litros."
+            },
+            "lavadora": {
+                text: "Las lavadoras modernas usan entre 40 y 60 litros por ciclo de lavado, dependiendo de la eficiencia y el tamaño de la carga. Las más antiguas pueden usar hasta 100 litros.",
+                animation: "waterTank",
+                calculation: "Cálculo: Lavadora eficiente (5kg): 45 litros, Lavadora estándar (7kg): 60 litros, Lavadora antigua: 80-100 litros."
+            },
+            "techo": {
+                text: "La cantidad de agua de lluvia que puedes captar depende del área de tu techo y de la precipitación en tu zona. La fórmula es: Área del techo (m²) x Precipitación (mm) = Litros captados.",
+                animation: "rain",
+                calculation: "Ejemplo: Para un techo de 50m² con una lluvia de 20mm: 50m² × 20mm = 1000 litros de agua captada."
+            },
+            "ahorrar": {
+                text: "Aquí tienes algunos consejos para ahorrar agua:",
+                tips: [
+                    "Cierra el grifo mientras te cepillas los dientes o te enjabonas",
+                    "Toma duchas cortas de 5 minutos o menos",
+                    "Arregla inmediatamente las fugas de agua",
+                    "Usa la lavadora y lavavajillas solo con cargas completas",
+                    "Instala aireadores en grifos y regaderas de bajo flujo",
+                    "Recolecta agua de lluvia para regar plantas"
+                ]
+            },
+            "bote": {
+                text: "La capacidad de los botes de agua varía según su tamaño. Los botes comunes tienen capacidades de 5, 10 o 20 litros.",
+                animation: "waterTank",
+                calculation: "Ejemplo: Un bote de 20 litros puede almacenar 20 litros de agua. Para calcular cuántos botes necesitas: Capacidad total deseada ÷ Capacidad del bote = Número de botes."
+            },
+            "default": {
+                text: "Hola, soy AquaBot. Puedo ayudarte con preguntas sobre almacenamiento de agua, captación pluvial y consejos para conservar el agua. ¿En qué específicamente te puedo ayudar?"
+            }
+        };
+
+        // Inicializar burbujas
+        createBubbles();
+
+        // Toggle del modo oscuro
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            // Cambiar icono según el modo
+            const icon = themeToggle.querySelector('svg');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            } else {
+                icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            }
+        });
+
+        // Manejar pregunta rápida
+        function askQuickQuestion(index) {
+            const question = quickQuestions[index];
+            addMessage(question, "user");
+            processQuestion(question);
+        }
+
+        // Enviar mensaje
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, "user");
+                processQuestion(message);
+                userInput.value = "";
+            }
+        }
+
+        // Manejar tecla Enter
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+
+        // Añadir mensaje al chat
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message");
+            messageDiv.classList.add(sender === "user" ? "user-message" : "bot-message");
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Mostrar indicador de escritura
+        function showTypingIndicator() {
+            const typingDiv = document.createElement("div");
+            typingDiv.classList.add("typing-indicator");
+            typingDiv.innerHTML = `
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            typingDiv.id = "typingIndicator";
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return typingDiv;
+        }
+
+        // Procesar pregunta y generar respuesta
+        function processQuestion(question) {
+            // Mostrar indicador de escritura
+            const typingIndicator = showTypingIndicator();
+
+            // Simular tiempo de respuesta
+            setTimeout(() => {
+                // Eliminar indicador de escritura
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+
+                const lowerQuestion = question.toLowerCase();
+                let responseKey = "default";
+
+                if (lowerQuestion.includes("tina")) {
+                    responseKey = "tina";
+                } else if (lowerQuestion.includes("lavadora")) {
+                    responseKey = "lavadora";
+                } else if (lowerQuestion.includes("techo") || lowerQuestion.includes("lluvia")) {
+                    responseKey = "techo";
+                } else if (lowerQuestion.includes("ahorrar") || lowerQuestion.includes("consejo")) {
+                    responseKey = "ahorrar";
+                } else if (lowerQuestion.includes("bote")) {
+                    responseKey = "bote";
+                }
+
+                const response = botResponses[responseKey];
+                addMessage(response.text, "bot");
+
+                // Mostrar animación si corresponde
+                if (response.animation) {
+                    setTimeout(() => {
+                        showAnimation(response.animation);
+                    }, 300);
+                }
+
+                // Mostrar cálculo si corresponde
+                if (response.calculation) {
+                    setTimeout(() => {
+                        showCalculation(response.calculation);
+                    }, 600);
+                }
+
+                // Mostrar consejos si corresponde
+                if (response.tips) {
+                    setTimeout(() => {
+                        showTips(response.tips);
+                    }, 900);
+                }
+            }, 1500);
+        }
+
+        // Mostrar animación
+        function showAnimation(type) {
+            const animationDiv = document.createElement("div");
+            animationDiv.classList.add("animation-container");
+
+            if (type === "waterTank") {
+                animationDiv.innerHTML = `
+                    <div class="water-tank">
+                        <div class="water-level" style="height: 70%;"></div>
+                    </div>
+                `;
+            } else if (type === "rain") {
+                let raindropsHTML = '';
+                for (let i = 0; i < 15; i++) {
+                    raindropsHTML += `<div class="raindrop" style="left: ${Math.random() * 100}%; animation-delay: ${Math.random() * 2}s;"></div>`;
+                }
+                animationDiv.innerHTML = `
+                    <div class="roof">
+                        ${raindropsHTML}
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(animationDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Mostrar cálculo
+        function showCalculation(calculation) {
+            const calculationDiv = document.createElement("div");
+            calculationDiv.classList.add("calculation");
+            calculationDiv.textContent = calculation;
+            chatMessages.appendChild(calculationDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Mostrar consejos
+        function showTips(tips) {
+            const tipDiv = document.createElement("div");
+            tipDiv.classList.add("tip-container");
+
+            let tipsHTML = "<strong>Consejos prácticos:</strong><ul>";
+            tips.forEach(tip => {
+                tipsHTML += `<li>${tip}</li>`;
+            });
+            tipsHTML += "</ul>";
+
+            tipDiv.innerHTML = tipsHTML;
+            chatMessages.appendChild(tipDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

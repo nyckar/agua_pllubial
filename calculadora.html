@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Agua Pluvial</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #16a085;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --danger-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --card-bg: white;
+            --text-color: #2c3e50;
+            --border-color: #ddd;
+        }
+
+        .dark-mode {
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --text-color: #e6e6e6;
+            --border-color: #2d3748;
+            --dark-color: #e6e6e6;
+            --light-color: #2d3748;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .calculator {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .calculator {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .input-section, .results-section {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #1abc9c;
+        }
+
+        .results-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: var(--light-color);
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .visualization {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .tank-visual {
+            width: 150px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border: 3px solid var(--primary-color);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .water-level {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--primary-color);
+            transition: height 3s ease-in-out;
+        }
+
+        .info-box {
+            background-color: #e8f4fc;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode .info-box {
+            background-color: #1e3a5f;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: white;
+            font-size: 20px;
+            font-family: arial;
+            text-decoration: none;
+        }
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+            <a href="index.html" class="back-link">regresar</a>
+            <h1>Calculadora de Agua Pluvial</h1>
+            <p class="description">
+                Calcula cuánta agua de lluvia puedes recolectar según el tipo de techo,
+                recipiente y precipitación en tu zona.
+            </p>
+        </header>
+
+        <div class="calculator">
+            <section class="input-section">
+                <h2>Datos de Entrada</h2>
+
+                <div class="form-group">
+                    <label for="roofType">Tipo de Techo</label>
+                    <select id="roofType">
+                        <option value="0.8">Tejado (eficiencia 80%)</option>
+                        <option value="0.9">Lámina metálica (eficiencia 90%)</option>
+                        <option value="0.95">Lámina plástica (eficiencia 95%)</option>
+                        <option value="0.7">Concreto (eficiencia 70%)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="roofArea">Área del Techo (m²)</label>
+                    <input type="number" id="roofArea" min="1" value="50">
+                </div>
+
+                <div class="form-group">
+                    <label for="rainfall">Precipitación Anual (mm)</label>
+                    <input type="number" id="rainfall" min="1" value="600">
+                    <small>Puedes consultar los datos de precipitación de tu zona en servicios meteorológicos</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="containerType">Tipo de Recipiente</label>
+                    <select id="containerType">
+                        <option value="barrel">Barril (200 litros)</option>
+                        <option value="tank500">Tanque (500 litros)</option>
+                        <option value="tank1000">Tanque (1000 litros)</option>
+                        <option value="cistern">Cisterna (5000 litros)</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customContainerGroup" style="display: none;">
+                    <label for="customCapacity">Capacidad Personalizada (litros)</label>
+                    <input type="number" id="customCapacity" min="1" value="200">
+                </div>
+
+                <button id="calculateBtn">Calcular</button>
+
+            </section>
+
+            <section class="results-section">
+                <h2>Resultados</h2>
+
+                <div class="result-item">
+                    <p>Agua recolectable anual:</p>
+                    <p class="result-value" id="totalWater">0 litros</p>
+                </div>
+
+                <div class="result-item">
+                    <p>Número de recipientes que puedes llenar:</p>
+                    <p class="result-value" id="containersCount">0</p>
+                </div>
+
+                <div class="result-item">
+                    <p>Agua recolectable mensual promedio:</p>
+                    <p class="result-value" id="monthlyWater">0 litros</p>
+                </div>
+
+                <div class="visualization">
+                    <h3>Visualización</h3>
+                    <div class="tank-visual">
+                        <div class="water-level" id="waterLevel"></div>
+                    </div>
+                    <p id="tankStatus">Recipiente vacío</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>¿Por qué recolectar agua pluvial?</h3>
+                    <p>La recolección de agua de lluvia es una práctica sostenible que ayuda a:</p>
+                    <ul>
+                        <li>Reducir el consumo de agua potable</li>
+                        <li>Disminuir la factura de agua</li>
+                        <li>Mitigar problemas de inundaciones</li>
+                        <li>Disponer de agua para riego y otros usos no potables</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>Calculadora de Agua Pluvial &copy; 2023 | Diseñada para promover prácticas sostenibles</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roofTypeSelect = document.getElementById('roofType');
+            const roofAreaInput = document.getElementById('roofArea');
+            const rainfallInput = document.getElementById('rainfall');
+            const containerTypeSelect = document.getElementById('containerType');
+            const customContainerGroup = document.getElementById('customContainerGroup');
+            const customCapacityInput = document.getElementById('customCapacity');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const totalWaterElement = document.getElementById('totalWater');
+            const containersCountElement = document.getElementById('containersCount');
+            const monthlyWaterElement = document.getElementById('monthlyWater');
+            const waterLevelElement = document.getElementById('waterLevel');
+            const tankStatusElement = document.getElementById('tankStatus');
+            const themeToggle = document.getElementById('themeToggle');
+
+            // Modo oscuro
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    themeToggle.textContent = '☀️';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    themeToggle.textContent = '🌙';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // Cargar tema guardado
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+            }
+
+            containerTypeSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customContainerGroup.style.display = 'block';
+                } else {
+                    customContainerGroup.style.display = 'none';
+                }
+            });
+
+            function getContainerCapacity() {
+                const containerType = containerTypeSelect.value;
+
+                switch(containerType) {
+                    case 'barrel':
+                        return 200;
+                    case 'tank500':
+                        return 500;
+                    case 'tank1000':
+                        return 1000;
+                    case 'cistern':
+                        return 5000;
+                    case 'custom':
+                        return parseFloat(customCapacityInput.value) || 200;
+                    default:
+                        return 200;
+                }
+            }
+
+            function calculateRainwater() {
+                const roofEfficiency = parseFloat(roofTypeSelect.value);
+                const roofArea = parseFloat(roofAreaInput.value);
+                const rainfall = parseFloat(rainfallInput.value);
+                const containerCapacity = getContainerCapacity();
+
+                if (!roofArea || !rainfall || !containerCapacity) {
+                    alert('Por favor, ingresa valores válidos en todos los campos.');
+                    return;
+                }
+
+                const totalWater = roofArea * rainfall * roofEfficiency;
+                const containersCount = Math.floor(totalWater / containerCapacity);
+                const monthlyWater = totalWater / 12;
+
+                totalWaterElement.textContent = `${totalWater.toLocaleString('es-ES', {maximumFractionDigits: 0})} litros`;
+                containersCountElement.textContent = containersCount;
+                monthlyWaterElement.textContent = `${monthlyWater.toLocaleString('es-ES', {maximumFractionDigits: 0})} litros`;
+
+                updateTankVisualization(totalWater, containerCapacity, containersCount);
+            }
+
+            function updateTankVisualization(totalWater, containerCapacity, containersCount) {
+                const remainingWater = totalWater % containerCapacity;
+                const fillPercentage = (remainingWater / containerCapacity) * 100;
+
+                waterLevelElement.style.height = `${fillPercentage}%`;
+
+                if (containersCount === 0) {
+                    tankStatusElement.textContent = 'Recipiente parcialmente lleno';
+                } else if (fillPercentage === 0) {
+                    tankStatusElement.textContent = `Recipiente vacío (${containersCount} recipientes llenos)`;
+                } else if (fillPercentage === 100) {
+                    tankStatusElement.textContent = `Recipiente lleno (${containersCount} recipientes llenos)`;
+                } else {
+                    tankStatusElement.textContent = `Recipiente parcialmente lleno (${containersCount} recipientes llenos)`;
+                }
+            }
+
+            calculateBtn.addEventListener('click', calculateRainwater);
+            calculateRainwater();
+        });
+    </script>
+</body>
+</html>

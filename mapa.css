@@ -1,0 +1,183 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+}
+#header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+#container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+#map {
+    height: 80vh;
+    width: 100%;
+}
+#info-panel {
+    background-color: white;
+    padding: 15px;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#legend {
+    display: flex;
+    gap: 10px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+.legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+}
+#stats {
+    text-align: right;
+}
+.popup-content {
+    min-width: 200px;
+}
+.popup-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+.popup-data {
+    margin: 3px 0;
+}
+
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            Font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            background-color: #f5f5f5;
+
+        }
+
+        #header {
+
+            background-color: #2c3e50;
+
+            color: White;
+
+            padding: 15px;
+
+            text-align: center;
+
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+        }
+
+        #container {
+
+            display: flex;
+
+            flex-direction: columna;
+
+            height: 100vh;
+
+        }
+
+        #map {
+
+            height: 80vh;
+
+            width: 100%;
+
+        }
+
+        #info-panel {
+
+            background-color: White;
+
+            padding: 15px;
+
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            Align-ítems: center;
+
+        }
+
+        #legend {
+
+            display: flex;
+
+            gap: 10px;
+
+        }
+
+        .legend-item {
+
+            display: flex;
+
+            Align-ítems: center;
+
+            margin-right: 15px;
+
+        }
+
+        .legend-color {
+
+            width: 20px;
+
+            height: 20px;
+
+            margin-right: 5px;
+
+            border: 1px solid #ccc;
+
+        }
+
+        #stats {
+
+            text-align: right;
+
+        }
+
+        .popup-content {
+
+            min-width: 200px;
+
+        }
+
+        .popup-title {
+
+            Font-weight: bold;
+
+            margin-bottom: 5px;
+
+            color: #2c3e50;
+
+        }
+
+        .popup-data {
+
+            margin: 3px 0;
+
+        }
+        a{
+          color: blue;
+          font-size: 20px;
+          font-family: arial;
+          text-decoration: none;
+        }
